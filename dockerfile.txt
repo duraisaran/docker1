@@ -1,0 +1,22 @@
+# Stage 1: Build React app
+FROM node:14-alpine AS builder
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build
+
+# Stage 2: Use Apache to serve built React app
+FROM httpd:2.4-alpine
+
+# Copy built app from the builder stage
+COPY --from=builder /app/build/ /usr/local/apache2/htdocs/
+
+# Expose port 80
+EXPOSE 80
+
+# Start Apache
+CMD ["httpd-foreground"]
